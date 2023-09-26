@@ -29,7 +29,7 @@ public class Cadastro extends JFrame {
 	private final String DB_PASSWORD = "Thiag@38580828";
 
 	public Cadastro() {
-		setTitle("Cadastro de Usuario");
+		setTitle("Cadastro de Usuario (FARMACIA)");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(400, 250);
 		setLocationRelativeTo(null);
@@ -39,11 +39,11 @@ public class Cadastro extends JFrame {
 		campoUsuario = new JTextField();
 		campoSenha = new JPasswordField();
 		campoConfirmaSenha = new JPasswordField();
-		botaoCadastrarUsuario = new JButton("Cadastrar");
+		botaoCadastrarUsuario = new JButton("Cadastrar-se");
 
 		panel.add(new JLabel("Nome: "));
 		panel.add(campoNome);
-		panel.add(new JLabel("Usuario: "));
+		panel.add(new JLabel("E-mail: "));
 		panel.add(campoUsuario);
 		panel.add(new JLabel("Senha: "));
 		panel.add(campoSenha);
@@ -67,7 +67,7 @@ public class Cadastro extends JFrame {
 				}
 				try {
 					Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-					String query = "INSERT INTO usuario(nome,email,senha) values(?,?,?)";
+					String query = "INSERT INTO usuario(nome,email,senha) VALUES(?,?,?)";
 					PreparedStatement preparedStatement = connection.prepareStatement(query);
 					preparedStatement.setString(1, nome);
 					preparedStatement.setString(2, email);
@@ -83,12 +83,5 @@ public class Cadastro extends JFrame {
 			}
 		});
 
-	}
-
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(() -> {
-			Cadastro cadastro = new Cadastro();
-			cadastro.setVisible(true);
-		});
 	}
 }
