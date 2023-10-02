@@ -1,18 +1,31 @@
 package farmacia;
 
-import java.awt.*;
-import javax.swing.*;
-
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 public class Login extends JFrame implements ActionListener {
 
 	JLabel lblUsuario, lblSenha, lblMensagem;
 	JTextField txtUsuario;
 	JPasswordField txtSenha;
-	JButton btnLogin, btnCadastro;
+	JButton btnLogin, btnCadastro, btnSair;
+
+	private final String DB_URL = "jdbc:mysql://localhost:3306/farmacia";
+	private final String DB_USER = "root";
+	private final String DB_PASSWORD = "Thiag@38580828";
 
 	public Login() {
 
@@ -37,9 +50,13 @@ public class Login extends JFrame implements ActionListener {
 		btnLogin.setBounds(50, 120, 100, 25);
 		btnLogin.addActionListener(this);
 
-		btnCadastro = new JButton("Cadastro");
-		btnCadastro.setBounds(200, 120, 100, 25);
+		btnCadastro = new JButton("Cadastrar");
+		btnCadastro.setBounds(150, 120, 100, 25);
 		btnCadastro.addActionListener(this);
+
+		btnSair = new JButton("Sair");
+		btnSair.setBounds(250, 120, 100, 25);
+		btnSair.addActionListener(this);
 
 		lblMensagem = new JLabel("");
 		lblMensagem.setBounds(50, 160, 200, 25);
@@ -50,6 +67,8 @@ public class Login extends JFrame implements ActionListener {
 		this.add(txtSenha);
 		this.add(btnLogin);
 		this.add(btnCadastro);
+		this.add(btnSair);
+
 		this.add(lblMensagem);
 	}
 
@@ -57,26 +76,43 @@ public class Login extends JFrame implements ActionListener {
 		String usuario = txtUsuario.getText();
 		String senha = new String(txtSenha.getPassword());
 
-		if (usuario.equals("admin") && senha.equals("123")) {
-			lblMensagem.setText("Seja bem-vindo, Administrador");
-			lblMensagem.setForeground(Color.blue);
+		try {
+			Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+			String query = "SELECT * FROM usuario WHERE email = ? AND senha = ?";
+			PreparedStatement preparedStatement = connection.prepareStatement(query);
+			preparedStatement.setString(1, usuario);
+			preparedStatement.setString(2, senha);
+			ResultSet resultSet = preparedStatement.executeQuery();
 
-		} else if (usuario.equals("usuario") && senha.equals("456")) {
-			lblMensagem.setText("Seja bem-vindo, Usuário");
-			lblMensagem.setForeground(Color.black);
-		} else {
-			lblMensagem.setText("Usuário ou Senha estão incorretos");
+			if (resultSet.next()) {
+				String nomeUsuario = resultSet.getString("nome");
+				lblMensagem.setText("Login realizado com sucesso para " + nomeUsuario);
+				lblMensagem.setForeground(Color.blue);
+			} else {
+				lblMensagem.setText("Usuário ou Senha estão incorretos");
+				lblMensagem.setForeground(Color.red);
+			}
+
+			resultSet.close();
+			preparedStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			lblMensagem.setText("Erro ao conectar ao banco de dados");
 			lblMensagem.setForeground(Color.red);
+			e.printStackTrace();
 		}
 	}
 
 	@Override
-
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnLogin) {
 			verificaLogin();
 		} else if (e.getSource() == btnCadastro) {
 			// Fechar Login e Chamar Cadastro
+			dispose();
+			Cadastro cadastro = new Cadastro();
+			cadastro.setVisible(true);
+		} else if (e.getSource() == btnSair) {
 			System.exit(0);
 		}
 	}
